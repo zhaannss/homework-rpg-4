@@ -11,7 +11,7 @@ public class AreaSkill extends Skill {
     public void cast(CombatNode target) {
         System.out.printf("  [%s / %s] AOE -> %s%n",
                 getSkillName(), getEffectName(), target.getName());
-        // Делегируем Composite и он сам распределит урон по живым листьям
+        // Делегируем Composite чтоб он сам распределит урон по живым листьям
         int damage = resolvedDamage();
         target.takeDamage(damage);
         if (!target.isAlive()) System.out.println("    " + target.getName() + " DEFEATED!");
