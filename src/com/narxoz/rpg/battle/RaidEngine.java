@@ -13,21 +13,63 @@ public class RaidEngine {
         return this;
     }
 
-    public RaidResult runRaid(CombatNode teamA, CombatNode teamB, Skill teamASkill, Skill teamBSkill) {
-        // TODO: Validate inputs (null checks, alive checks, required skills).
-        // TODO: Implement round-based simulation:
-        // 1) Team A casts on Team B
-        // 2) Team B casts on Team A (if still alive)
-        // 3) Track rounds and log each step
-        // 4) Stop when one team is defeated (or max rounds reached)
-        //
-        // Optional extension:
-        // Use random for critical strikes or other deterministic events.
-        // Example: boolean critA = random.nextInt(100) < 10;
+    public RaidResult runRaid(CombatNode teamA, CombatNode teamB,
+                              Skill teamASkill, Skill teamBSkill) {
         RaidResult result = new RaidResult();
-        result.setRounds(0);
-        result.setWinner("TBD");
-        result.addLine("TODO: implement raid simulation");
+
+        if (teamA == null || teamB == null || teamASkill == null || teamBSkill == null) {
+            result.setWinner("ERROR: null input");
+            result.setRounds(0);
+            result.addLine("Invalid inputs.");
+            return result;
+        }
+
+        if (!teamA.isAlive() || !teamB.isAlive()) {
+            result.setWinner("ERROR: team already dead");
+            result.setRounds(0);
+            return result;
+        }
+
+        System.out.println("\n=== RAID START ===");
+        System.out.println("Team A: " + teamA.getName() + " | Team B: " + teamB.getName());
+
+        int round = 0;
+        final int MAX_ROUNDS = 100;
+
+        while (teamA.isAlive() && teamB.isAlive() && round < MAX_ROUNDS) {
+            round++;
+            System.out.println("\n-- Round " + round + " --");
+
+            // Team A casts on Team B
+            boolean critA = random.nextInt(100) < 10;
+            result.addLine("Round " + round + ": " + teamA.getName()
+                    + " casts [" + teamASkill.getSkillName() + "] on " + teamB.getName()
+                    + (critA ? " (CRIT!)" : ""));
+            teamASkill.cast(teamB);
+
+            if (!teamB.isAlive()) break;
+
+            // Team B casts on Team A
+            boolean critB = random.nextInt(100) < 10;
+            result.addLine("Round " + round + ": " + teamB.getName()
+                    + " casts [" + teamBSkill.getSkillName() + "] on " + teamA.getName()
+                    + (critB ? " (CRIT!)" : ""));
+            teamBSkill.cast(teamA);
+        }
+
+        String winner;
+        if (teamA.isAlive() && !teamB.isAlive()) {
+            winner = teamA.getName();
+        } else if (teamB.isAlive() && !teamA.isAlive()) {
+            winner = teamB.getName();
+        } else {
+            winner = "Draw (max rounds reached)";
+        }
+
+        result.setWinner(winner);
+        result.setRounds(round);
+        result.addLine("Winner: " + winner + " after " + round + " rounds.");
+        System.out.println("\n=== RAID END — Winner: " + winner + " ===");
         return result;
     }
 }
